@@ -4,6 +4,7 @@ import { db } from '../../../lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Recipe {
   id: string;
@@ -88,12 +89,16 @@ export default function RecipeDetailPage() {
 
       {/* Recipe Detail Content */}
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
-          <img 
-            src={recipe.imageUrl} 
-            alt={recipe.name} 
-            className="w-full h-64 object-cover"
-          />
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="relative h-64 w-full">
+            <Image 
+              src={recipe.imageUrl} 
+              alt={recipe.name} 
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+          </div>
           
           <div className="p-6">
             <h1 className="text-3xl font-bold text-gray-800 mb-4">{recipe.name}</h1>
@@ -123,7 +128,7 @@ export default function RecipeDetailPage() {
                 <ol className="space-y-4">
                   {recipe.instructions.map((instruction, index) => (
                     <li key={index} className="flex">
-                      <span className="shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
+                      <span className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
                         {index + 1}
                       </span>
                       <p className="text-gray-700">{instruction}</p>

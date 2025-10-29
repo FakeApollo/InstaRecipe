@@ -1,8 +1,9 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '../../lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import Link from 'next/link';
+import RecipeCard from '../../components/RecipeCard';
 
 interface Recipe {
   id: string;
@@ -18,6 +19,25 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
+  const [ingredientDetails, setIngredientDetails] = useState<{[key: string]: string}>({});
+
+  const getIngredientDetails = async (ingredientIds: string[]) => {
+    const details: {[key: string]: string} = {};
+    
+    for (const id of ingredientIds) {
+      try {
+        const ingredientDocRef = doc(db, 'foodItems', id);
+        const ingredientDocSnap = await getDoc(ingredientDocRef);
+        if (ingredientDocSnap.exists()) {
+          details[id] = ingredientDocSnap.data().name;
+        }
+      } catch (error) {
+        console.error(`Error fetching ingredient ${id}:`, error);
+      }
+    }
+    
+    return details;
+  };
 
   useEffect(() => {
     // Get selected ingredients from URL parameters
@@ -46,7 +66,13 @@ export default function RecipesPage() {
           return selected.every(ingredient => recipe.ingredients.includes(ingredient));
         });
 
+        // Get ingredient names for all recipes
+        const allIngredientIds = filteredRecipes.flatMap(recipe => recipe.ingredients);
+        const uniqueIngredientIds = [...new Set(allIngredientIds)];
+        const ingredientDetails = await getIngredientDetails(uniqueIngredientIds);
+
         setRecipes(filteredRecipes);
+        setIngredientDetails(ingredientDetails);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching recipes:', error);
@@ -98,33 +124,15 @@ export default function RecipesPage() {
         {recipes.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {recipes.map((recipe) => (
-              <Link key={recipe.id} href={`/recipes/${recipe.id}`} className="block">
-                <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 border border-gray-200 transform hover:-translate-y-1 transition-transform duration-300">
-                  <div className="h-48 overflow-hidden">
-                    <img 
-                      src={recipe.imageUrl} 
-                      alt={recipe.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-1">{recipe.name}</h3>
-                    <p className="text-sm text-gray-600">Cooking time: {recipe.cookingTime} mins</p>
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {recipe.ingredients.slice(0, 3).map((ingredient, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                          {ingredient}
-                        </span>
-                      ))}
-                      {recipe.ingredients.length > 3 && (
-                        <span className="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-full">
-                          +{recipe.ingredients.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Link>
+              <RecipeCard
+                key={recipe.id}
+                id={recipe.id}
+                name={recipe.name}
+                cookingTime={recipe.cookingTime}
+                imageUrl={recipe.imageUrl}
+                ingredients={recipe.ingredients}
+                ingredientNames={ingredientDetails}
+              />
             ))}
           </div>
         ) : (
