@@ -107,7 +107,7 @@ export default function RecipesPage() {
         {/* Selected Ingredients Display */}
         {selectedIngredients.length > 0 && (
           <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">Recipes with ingredients:</h2>
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Recipes that include: </h2>
             <div className="flex flex-wrap gap-2">
               {selectedIngredients.map((ingredient, index) => (
                 <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
