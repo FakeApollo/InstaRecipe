@@ -40,7 +40,6 @@ export default function RecipesPage() {
   };
 
   useEffect(() => {
-    // Get selected ingredients from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
     const selected = urlParams.getAll('selected');
     setSelectedIngredients(selected);
@@ -57,16 +56,14 @@ export default function RecipesPage() {
             instructions: Array.isArray(data.instructions) ? data.instructions : [],
             cookingTime: data.cookingTime || 0,
             category: data.category || '',
-            imageUrl: data.imageUrl || 'https://via.placeholder.com/300x200'
+            imageUrl: data.imageUrl || '/images/recipes/default.webp'
           };
         });
 
-        // Filter recipes that contain all selected ingredients
-        const filteredRecipes = allRecipes.filter(recipe => {
-          return selected.every(ingredient => recipe.ingredients.includes(ingredient));
-        });
+        const filteredRecipes = selected.length > 0 
+          ? allRecipes.filter(recipe => selected.every(ingredient => recipe.ingredients.includes(ingredient)))
+          : allRecipes;
 
-        // Get ingredient names for all recipes
         const allIngredientIds = filteredRecipes.flatMap(recipe => recipe.ingredients);
         const uniqueIngredientIds = [...new Set(allIngredientIds)];
         const ingredientDetails = await getIngredientDetails(uniqueIngredientIds);
@@ -88,17 +85,18 @@ export default function RecipesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-gray-200 p-4 shadow-md">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/">
-            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
-              Logo
+      <header className="bg-green-600 text-white p-4 shadow-lg">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <Link href="/" className="flex items-center space-x-2 hover:text-green-200 transition-colors">
+            <div className="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-bold text-lg">
+              IR
             </div>
+            <span>← Back</span>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-800">Insta Recipe</h1>
-          <div className="w-12 h-12"></div>
+          <h1 className="text-2xl font-bold">Insta Recipe</h1>
+          <div className="w-10"></div>
         </div>
       </header>
 
@@ -106,12 +104,12 @@ export default function RecipesPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Selected Ingredients Display */}
         {selectedIngredients.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-700 mb-2">Recipes that include: </h2>
+          <div className="mb-6 p-4 bg-white rounded-lg shadow">
+            <h2 className="text-lg font-semibold text-gray-700 mb-2">Recipes with:</h2>
             <div className="flex flex-wrap gap-2">
               {selectedIngredients.map((ingredient, index) => (
-                <span key={index} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                  {ingredient}
+                <span key={index} className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">
+                  {ingredientDetails[ingredient] || ingredient}
                 </span>
               ))}
             </div>
@@ -119,10 +117,12 @@ export default function RecipesPage() {
         )}
 
         {/* Recipe Cards Grid */}
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Matching Recipes ({recipes.length})</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+          {selectedIngredients.length > 0 ? 'Matching Recipes' : 'All Recipes'} ({recipes.length})
+        </h2>
         
         {recipes.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {recipes.map((recipe) => (
               <RecipeCard
                 key={recipe.id}
@@ -138,7 +138,7 @@ export default function RecipesPage() {
         ) : (
           <div className="text-center py-10">
             <p className="text-gray-600 text-lg">No recipes found with your selected ingredients.</p>
-            <Link href="/" className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600">
+            <Link href="/" className="mt-4 inline-block px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600">
               Back to Ingredients
             </Link>
           </div>

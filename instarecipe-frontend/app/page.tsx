@@ -1,148 +1,130 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { db } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import IngredientCard from '../components/IngredientCard';
-import { useRouter } from 'next/navigation';
+"use client";
+
+import { useState, useEffect } from "react";
+import Hero from "../components/Hero";
+import IngredientCard from "../components/IngredientCard";
+import Loading from "../components/Loading";
+import SearchBar from "../components/SearchBar";
+import { db } from "../lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Home() {
   const [foodItems, setFoodItems] = useState<any[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
-  const [matchingRecipes, setMatchingRecipes] = useState<any[]>([]);
-  const [showResults, setShowResults] = useState(false);
-  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Load food items from Firestore
   useEffect(() => {
     const fetchFoodItems = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'foodItems'));
-        const items = querySnapshot.docs.map(doc => ({
+        const querySnapshot = await getDocs(collection(db, "foodItems"));
+        const items = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setFoodItems(items);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching food items:', error);
+        console.error("Error fetching food items:", error);
         setLoading(false);
       }
     };
-
     fetchFoodItems();
   }, []);
 
   const toggleItem = (itemId: string) => {
-    if (selectedItems.includes(itemId)) {
-      setSelectedItems(selectedItems.filter(id => id !== itemId));
-    } else {
-      setSelectedItems([...selectedItems, itemId]);
-    }
+    setSelectedItems((prev) =>
+      prev.includes(itemId)
+        ? prev.filter((id) => id !== itemId)
+        : [...prev, itemId]
+    );
   };
 
-  const generateRecipes = async () => {
-    if (selectedItems.length === 0) return;
-    
-    // Create URL with selected ingredients as query parameters
+  const generateRecipes = () => {
     const queryParams = new URLSearchParams();
-    selectedItems.forEach(item => queryParams.append('selected', item));
-    
-    // Navigate to recipes page with selected ingredients
-    router.push(`/recipes?${queryParams.toString()}`);
+    selectedItems.forEach((item) => queryParams.append("selected", item));
+    window.location.href = `/recipes?${queryParams.toString()}`;
   };
 
-  // Filter food items based on search term
-  const filteredItems = foodItems.filter(item =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const scrollToIngredients = () => {
+    document.getElementById("ingredients-section")?.scrollIntoView({
+      behavior: "smooth"
+    });
+  };
+
+  const filteredItems = foodItems.filter(
+    (item) =>
+      String(item.name).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      String(item.id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Group items by category
   const categorizedItems: Record<string, any[]> = {};
-  filteredItems.forEach(item => {
-    if (!categorizedItems[item.category]) {
-      categorizedItems[item.category] = [];
-    }
+  filteredItems.forEach((item) => {
+    if (!categorizedItems[item.category]) categorizedItems[item.category] = [];
     categorizedItems[item.category].push(item);
   });
 
-  if (loading) {
-    return <div className="text-center py-10">Loading ingredients...</div>;
-  }
+  if (loading) return <Loading />;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-gray-200 p-4 shadow-md">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-bold">
-            Logo
-          </div>
-          <h1 className="text-2xl font-bold text-gray-800">Insta Recipe</h1>
-          <div className="w-12 h-12"></div> {/* Empty space for balance */}
-        </div>
-      </header>
+    <div className="min-h-screen bg-black">
+      {/* Hero Section with Background Image */}
+      <Hero onScrollToIngredients={scrollToIngredients} />
 
-      {/* Main Content */}
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="flex items-center bg-gray-200 rounded-full px-3 py-2">
-            <input
-              type="text"
-              placeholder="Search Food Items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="flex-grow bg-transparent outline-none px-2"
-            />
-            <button className="p-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+      {/* Ingredients Section with Default Background */}
+      <section
+        id="ingredients-section"
+        className="min-h-screen py-20 px-4 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/dark-bg.jpg')" }}
+      >
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-5xl font-semibold text-center mb-12 text-white">
+            Ingredients
+          </h2>
+
+          <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+          {/* Categories */}
+          {Object.entries(categorizedItems).map(([category, items]) => (
+            <div key={category} className="mb-16">
+              <h3 className="text-2xl font-medium text-center mb-8 text-white capitalize border-b border-white/30 pb-2">
+                {category}
+              </h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                {items.map((item) => (
+                  <IngredientCard
+                    key={item.id}
+                    name={item.name}
+                    category={item.category}
+                    imageUrl={
+                      item.imageUrl || "/images/ingredients/default.webp"
+                    }
+                    isSelected={selectedItems.includes(item.id)}
+                    onClick={() => toggleItem(item.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Generate Recipes Button */}
+          <div className="text-center mt-16">
+            <button
+              onClick={generateRecipes}
+              disabled={selectedItems.length === 0}
+              className={`px-12 py-4 rounded-full text-lg font-semibold transition-all ${
+                selectedItems.length === 0
+                  ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700 transform hover:scale-105 shadow-lg"
+              }`}
+            >
+              {selectedItems.length === 0
+                ? "SELECT INGREDIENTS"
+                : `LET'S MAKE (${selectedItems.length})`}
             </button>
           </div>
         </div>
-
-        {/* Selected Items Label */}
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold text-gray-600">Select food items</h2>
-        </div>
-
-        {/* Categorized Food Items */}
-        {Object.entries(categorizedItems).map(([category, items]) => (
-          <div key={category} className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 capitalize">{category}</h3>
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
-              {items.map((item) => (
-                <IngredientCard
-                  key={item.id}
-                  name={item.name}
-                  category={item.category}
-                  imageUrl={item.imageUrl || '/images/ingredients/default.jpg'}
-                  isSelected={selectedItems.includes(item.id)}
-                  onClick={() => toggleItem(item.id)}
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {/* Generate Button */}
-        <div className="text-center mt-6">
-          <button
-            onClick={generateRecipes}
-            disabled={selectedItems.length === 0}
-            className={`px-6 py-3 rounded-full font-semibold ${
-              selectedItems.length === 0
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
-          >
-            Let's Make!
-          </button>
-        </div>
-      </main>
+      </section>
     </div>
   );
 }
