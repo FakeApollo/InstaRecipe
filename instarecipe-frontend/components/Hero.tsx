@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import Navbar from "./Navbar";
 
 interface HeroProps {
