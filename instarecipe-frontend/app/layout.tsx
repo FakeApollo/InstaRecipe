@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import BackToTop from "../components/BackToTop";
+
 
 export const metadata: Metadata = {
   title: "InstaRecipe",
@@ -21,6 +23,7 @@ export default function RootLayout({
       </head>
       <body className="antialiased bg-black" style={{ fontFamily: 'Poppins, sans-serif' }}>
         {children}
+        <BackToTop />
       </body>
     </html>
   );

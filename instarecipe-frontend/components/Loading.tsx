@@ -2,10 +2,8 @@
 
 const Loading = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-transparent">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-500 mx-auto mb-4"></div>
-      </div>
+    <div className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-md z-50">
+      <div className="w-16 h-16 border-4 border-white/40 rounded-full animate-spin border-t-white"></div>
     </div>
   );
 };

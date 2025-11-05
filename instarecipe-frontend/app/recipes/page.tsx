@@ -4,6 +4,7 @@ import { db } from '../../lib/firebase';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import RecipeCard from '../../components/RecipeCard';
+import Loading from '../../components/Loading';
 
 interface Recipe {
   id: string;
@@ -81,8 +82,8 @@ export default function RecipesPage() {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-10">Loading recipes...</div>;
-  }
+  return <Loading />;
+}
 
   return (
     <div className="min-h-screen bg-gray-50">

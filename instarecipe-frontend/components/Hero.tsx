@@ -42,7 +42,7 @@ const Hero: React.FC<HeroProps> = ({ onScrollToIngredients }) => {
       <Navbar />
 
       {/* Hero Content - Left Aligned */}
-      <div className="relative z-10 text-white px-8 md:px-16 lg:px-24 w-full max-w-2xl">
+      <div className="relative z-10 text-white px-8 md:px-16 lg:px-20 w-full max-w-2xl">
         <h1 className="leading-none mb-8">
           <span className="text-6xl md:text-7xl lg:text-6xl text-red-200">Insta</span>
           <br />
