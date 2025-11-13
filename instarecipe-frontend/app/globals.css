@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --primary: #2E8B57;    /* Green theme */
+  --secondary: #3CB371;
+  --accent: #90EE90;
+  --background: #F8FFF8;
+  --text: #1A3C27;
 }
 
 @theme inline {
@@ -31,4 +34,145 @@ html {
 body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+
+/* === BRUTALIST INGREDIENT CARD ANIMATIONS === */
+
+/* Spin and Zoom Animation */
+@keyframes spin-and-zoom {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.2);
+  }
+  75% {
+    transform: rotate(270deg) scale(1.1);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.animate-spin-and-zoom {
+  animation: spin-and-zoom 3s linear infinite;
+}
+
+/* Swipe Animations */
+@keyframes swipeRight {
+  0% {
+    transform: translateX(-100%) skew(-20deg);
+  }
+  100% {
+    transform: translateX(200%) skew(-20deg);
+  }
+}
+
+@keyframes swipeLeft {
+  0% {
+    transform: translateX(100%) skew(-20deg);
+  }
+  100% {
+    transform: translateX(-200%) skew(-20deg);
+  }
+}
+
+.animate-swipeRight {
+  animation: swipeRight 2s ease-in-out infinite;
+}
+
+.animate-swipeLeft {
+  animation: swipeLeft 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Brutalist button hover effects */
+.brutalist-button:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: 8px 8px 0 #000000 !important;
+}
+
+@keyframes floating {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  25% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+  75% {
+    transform: translateY(-3px);
+  }
+}
+
+.animate-floating {
+  animation: floating 3s ease-in-out infinite;
+}
+
+/* Alternative: Gentle Float */
+@keyframes gentle-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+.animate-gentle-float {
+  animation: gentle-float 2s ease-in-out infinite;
+}
+
+/* Swipe Animations */
+@keyframes swipeRight {
+  0% {
+    transform: translateX(-100%) skew(-20deg);
+  }
+  100% {
+    transform: translateX(200%) skew(-20deg);
+  }
+}
+
+@keyframes swipeLeft {
+  0% {
+    transform: translateX(100%) skew(-20deg);
+  }
+  100% {
+    transform: translateX(-200%) skew(-20deg);
+  }
+}
+
+.animate-swipeRight {
+  animation: swipeRight 2s ease-in-out infinite;
+}
+
+.animate-swipeLeft {
+  animation: swipeLeft 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+  .brutalist-button {
+    margin: 0.25rem;
+  }
+}
+
+/* Brutalist button hover effects */
+.brutalist-button:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 #000000 !important;
+}
+
+@media (min-width: 640px) {
+  .brutalist-button:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0 #000000 !important;
+  }
 }

@@ -5,6 +5,7 @@ import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import Link from 'next/link';
 import RecipeCard from '../../components/RecipeCard';
 import Loading from '../../components/Loading';
+import Navbar from "../../components/Navbar";
 
 interface Recipe {
   id: string;
@@ -86,21 +87,8 @@ export default function RecipesPage() {
 }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-green-600 text-white p-4 shadow-lg">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2 hover:text-green-200 transition-colors">
-            <div className="w-10 h-10 bg-white text-green-600 rounded-full flex items-center justify-center font-bold text-lg">
-              IR
-            </div>
-            <span>← Back</span>
-          </Link>
-          <h1 className="text-2xl font-bold">Insta Recipe</h1>
-          <div className="w-10"></div>
-        </div>
-      </header>
-
+    <div className="min-h-screen  bg-linear-to-r from-transparent via-white/10 to-transparent">
+      <Navbar />
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Selected Ingredients Display */}
@@ -118,7 +106,7 @@ export default function RecipesPage() {
         )}
 
         {/* Recipe Cards Grid */}
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+        <h2 className="text-2xl font-bold mb-6 text-gray-50">
           {selectedIngredients.length > 0 ? 'Matching Recipes' : 'All Recipes'} ({recipes.length})
         </h2>
         
