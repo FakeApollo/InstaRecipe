@@ -1,10 +1,10 @@
-'use client';
-import { useState, useEffect } from 'react';
-import { db } from '../../../lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { useParams } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+"use client";
+import { useState, useEffect } from "react";
+import { db } from "../../../lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { useParams } from "next/navigation";
+import Loading from "../../../components/Loading";
+import Image from "next/image";
 
 interface Recipe {
   id: string;
@@ -20,32 +20,38 @@ export default function RecipeDetailPage() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
-  const [ingredientDetails, setIngredientDetails] = useState<{[key: string]: string}>({});
+  const [ingredientDetails, setIngredientDetails] = useState<{
+    [key: string]: string;
+  }>({});
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        if (typeof id === 'string') {
-          const docRef = doc(db, 'recipes', id);
+        if (typeof id === "string") {
+          const docRef = doc(db, "recipes", id);
           const docSnap = await getDoc(docRef);
 
           if (docSnap.exists()) {
             const data = docSnap.data();
             const recipeData = {
               id: docSnap.id,
-              name: data.name || '',
-              ingredients: Array.isArray(data.ingredients) ? data.ingredients : [],
-              instructions: Array.isArray(data.instructions) ? data.instructions : [],
+              name: data.name || "",
+              ingredients: Array.isArray(data.ingredients)
+                ? data.ingredients
+                : [],
+              instructions: Array.isArray(data.instructions)
+                ? data.instructions
+                : [],
               cookingTime: data.cookingTime || 0,
-              category: data.category || '',
-              imageUrl: data.imageUrl || 'https://via.placeholder.com/300x200'
+              category: data.category || "",
+              imageUrl: data.imageUrl || "https://via.placeholder.com/300x200",
             };
             setRecipe(recipeData);
 
             // Fetch ingredient names
-            const ingredientNames: {[key: string]: string} = {};
+            const ingredientNames: { [key: string]: string } = {};
             for (const ingredientId of recipeData.ingredients) {
-              const ingredientDocRef = doc(db, 'foodItems', ingredientId);
+              const ingredientDocRef = doc(db, "foodItems", ingredientId);
               const ingredientDocSnap = await getDoc(ingredientDocRef);
               if (ingredientDocSnap.exists()) {
                 ingredientNames[ingredientId] = ingredientDocSnap.data().name;
@@ -56,7 +62,7 @@ export default function RecipeDetailPage() {
         }
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching recipe:', error);
+        console.error("Error fetching recipe:", error);
         setLoading(false);
       }
     };
@@ -65,87 +71,111 @@ export default function RecipeDetailPage() {
   }, [id]);
 
   if (loading) {
-    return <div className="text-center py-10">Loading recipe...</div>;
+    return <Loading />;
   }
 
   if (!recipe) {
-    return <div className="text-center py-10">Recipe not found.</div>;
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex items-center justify-center">
+        Recipe not found.
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-gray-200 p-4 shadow-md">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <Link href="/recipes">
-            <div className="w-12 h-12 bg-black rounded-full flex items-center justify-center text-white font-bold cursor-pointer">
-              Logo
-            </div>
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-800">Insta Recipe</h1>
-          <div className="w-12 h-12"></div>
-        </div>
-      </header>
+    <div
+      className="min-h-screen bg-gray-800 text-white pb-10" // p-6 সরালাম, যাতে ইমেজ বর্ডারে লেগে থাকে
+      style={{
+        backgroundImage: `url('/dark-bg.jpga')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* ১. হিরো ইমেজ (এখন এটি কন্টেইনারের বাইরে, তাই পুরো ওয়াইড এবং বাম থেকে শুরু হবে) */}
+      <div className="relative w-full h-[500px] mb-8">
+        <Image
+          src={recipe.imageUrl}
+          alt={recipe.name}
+          fill
+          className="object-cover"
+          priority
+          sizes="100vw"
+        />
 
-      {/* Recipe Detail Content */}
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="relative h-64 w-full">
-            <Image 
-              src={recipe.imageUrl} 
-              alt={recipe.name} 
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
+        {/* গ্রেডিয়েন্ট শেড */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-900/50 via-40% to-gray-800"></div>
+
+        {/* শুধু বড় টাইটেল */}
+        <div className="absolute bottom-0 left-0 w-full p-6 pb-10 text-center z-10">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white drop-shadow-xl">
+            {recipe.name}
+          </h1>
+        </div>
+      </div>
+      <div className="flex justify-center gap-6 mb-10 text-lg font-medium text-gray-300">
+        <span className="px-4 py-2 bg-gray-900 rounded-full border border-gray-700">
+          ⏱️ {recipe.cookingTime} mins
+        </span>
+        <span className="px-4 py-2 bg-gray-900 rounded-full border border-gray-700 uppercase tracking-wide">
+          {recipe.category}
+        </span>
+      </div>
+      {/* ২. বাকি সব কন্টেন্ট (টাইটেল, টেক্সট) মাঝখানে থাকবে */}
+      <div className="max-w-5xl mx-auto px-6">
+        {/* Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Small Image + Instructions */}
+          <div className="lg:col-span-2">
+            {/* ছোট থাম্বনেইল ইমেজ */}
+            <div className="mb-8">
+              <Image
+                src={recipe.imageUrl}
+                alt="Recipe Thumbnail"
+                width={400}
+                height={300}
+                className="rounded-xl object-cover shadow-lg"
+              />
+            </div>
+
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold mb-4 border-b pb-2">
+                How to Make
+              </h2>
+              <ol className="space-y-4 text-lg leading-relaxed">
+                {recipe.instructions.map((step, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center mr-3">
+                      {index + 1}
+                    </span>
+                    <p>{step}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
           </div>
-          
-          <div className="p-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4">{recipe.name}</h1>
-            
-            <div className="flex items-center text-gray-600 mb-6">
-              <span className="mr-4">⏱️ {recipe.cookingTime} mins</span>
-              <span className="capitalize">Category: {recipe.category}</span>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Ingredients Section */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">Ingredients</h2>
-                <ul className="space-y-2">
-                  {recipe.ingredients.map((ingredientId, index) => (
-                    <li key={index} className="flex items-center">
-                      <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
-                      {ingredientDetails[ingredientId] || ingredientId}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Instructions Section */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 border-b pb-2">How to Make</h2>
-                <ol className="space-y-4">
-                  {recipe.instructions.map((instruction, index) => (
-                    <li key={index} className="flex">
-                      <span className="flex-shrink-0 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">
-                        {index + 1}
-                      </span>
-                      <p className="text-gray-700">{instruction}</p>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            </div>
+          {/* Right Column - Ingredients */}
+          <div className="bg-gray-900 p-6 rounded-lg h-fit sticky top-4">
+            <h2 className="text-2xl font-semibold mb-4">Ingredients</h2>
+            <ul className="space-y-2">
+              {recipe.ingredients.map((ingredientId, index) => (
+                <li key={index} className="flex items-center">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3"></span>
+                  {ingredientDetails[ingredientId] || ingredientId}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
-        <div className="mt-6 text-center">
-          <Link href="/recipes" className="px-4 py-2 bg-gray-300 text-gray-800 rounded-full hover:bg-gray-400">
-            Back to Recipes
-          </Link>
+        {/* Final Note */}
+        <div className="mt-8 p-4 bg-gray-900 rounded-lg text-center">
+          <p className="italic">
+            গরম গরম পরিবেশন করুন — পছন্দ হলে চাট মসলা ছিটিয়ে। 😋
+          </p>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

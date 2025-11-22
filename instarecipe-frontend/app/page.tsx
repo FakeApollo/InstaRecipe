@@ -1,34 +1,37 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Hero from '../components/Hero';
-import IngredientCard from '../components/IngredientCard';
-import Loading from '../components/Loading';
-import SearchBar from '../components/SearchBar';
-import { db } from '../lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Hero from "../components/Hero";
+import IngredientCard from "../components/IngredientCard";
+import Loading from "../components/Loading";
+import SearchBar from "../components/SearchBar";
+import { db } from "../lib/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function Home() {
   const [foodItems, setFoodItems] = useState<any[]>([]);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchFoodItems = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'foodItems'));
+        const querySnapshot = await getDocs(collection(db, "foodItems"));
         const items = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
         setFoodItems(items);
-        setLoading(false);
       } catch (error) {
-        console.error('Error fetching food items:', error);
+        console.error("Error fetching food items:", error);
+      } finally {
         setLoading(false);
       }
     };
+
     fetchFoodItems();
   }, []);
 
@@ -42,13 +45,13 @@ export default function Home() {
 
   const generateRecipes = () => {
     const queryParams = new URLSearchParams();
-    selectedItems.forEach((item) => queryParams.append('selected', item));
-    window.location.href = `/recipes?${queryParams.toString()}`;
+    selectedItems.forEach((item) => queryParams.append("selected", item));
+    router.push(`/recipes?${queryParams.toString()}`);
   };
 
   const scrollToIngredients = () => {
-    document.getElementById('ingredients-section')?.scrollIntoView({
-      behavior: 'smooth',
+    document.getElementById("ingredients-section")?.scrollIntoView({
+      behavior: "smooth",
     });
   };
 
@@ -74,8 +77,10 @@ export default function Home() {
       {/* Ingredients Section */}
       <section
         id="ingredients-section"
-        className="min-h-screen py-20 px-2 sm:px-4 md:px-6 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/dark-bg.jpg')" }}
+        className="min-h-screen py-20 px-2 sm:px-4 md:px-6 bg-cover bg-center bg-no-repeat bg-fixed"
+        style={{
+          backgroundImage: "url('/dark-bg.jpg')",
+        }}
       >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl sm:text-5xl font-semibold text-center mb-12 text-white">
@@ -91,7 +96,6 @@ export default function Home() {
                 {category}
               </h3>
 
-              {/* Responsive Grid */}
               <div
                 className="
                   grid
@@ -109,9 +113,8 @@ export default function Home() {
                   <IngredientCard
                     key={item.id}
                     name={item.name}
-                    // category={item.category}
                     imageUrl={
-                      item.imageUrl || '/images/ingredients/default.webp'
+                      item.imageUrl || "/images/ingredients/default.webp"
                     }
                     isSelected={selectedItems.includes(item.id)}
                     onClick={() => toggleItem(item.id)}
@@ -128,12 +131,12 @@ export default function Home() {
               disabled={selectedItems.length === 0}
               className={`px-12 py-4 rounded-full text-lg font-semibold transition-all ${
                 selectedItems.length === 0
-                  ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
-                  : 'bg-green-600 text-white hover:bg-green-700 active:scale-95 shadow-lg'
+                  ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                  : "bg-green-600 text-white hover:bg-green-700 active:scale-95 shadow-lg"
               }`}
             >
               {selectedItems.length === 0
-                ? 'SELECT INGREDIENTS'
+                ? "SELECT INGREDIENTS"
                 : `LET'S MAKE (${selectedItems.length})`}
             </button>
           </div>
